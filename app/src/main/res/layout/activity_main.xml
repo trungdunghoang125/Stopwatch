@@ -9,6 +9,7 @@
     tools:context=".MainActivity">
 
     <Chronometer
+        android:id="@+id/stopwatch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="56sp"
