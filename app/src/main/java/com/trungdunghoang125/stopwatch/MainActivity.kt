@@ -8,14 +8,27 @@ import android.widget.Chronometer
 
 class MainActivity : AppCompatActivity() {
     lateinit var stopwatch: Chronometer
-    var running = false
-    var offset: Long = 0
+    private var running = false
+    private var offset: Long = 0
+    // key string for using Bundle
+    val OFF_SET_KEY = "offset"
+    val RUNNING_KEY = "running"
+    val BASE_KEY = "base"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         stopwatch = findViewById(R.id.stopwatch)
+
+        if (savedInstanceState != null) {
+            offset = savedInstanceState.getLong(OFF_SET_KEY)
+            running = savedInstanceState.getBoolean(RUNNING_KEY)
+            if (running) {
+                stopwatch.base = savedInstanceState.getLong(BASE_KEY)
+                stopwatch.start()
+            }
+            else setBaseTime()
+        }
 
         val startButton = findViewById<Button>(R.id.start_button)
         startButton.setOnClickListener {
@@ -31,14 +44,7 @@ class MainActivity : AppCompatActivity() {
             if (running) {
                 saveOffset()
                 stopwatch.stop()
-                pauseButton.text = "Resume"
                 running = false
-            }
-            else {
-                pauseButton.text = "Pause"
-                stopwatch.start()
-                setBaseTime()
-                running = true
             }
         }
 
@@ -47,17 +53,22 @@ class MainActivity : AppCompatActivity() {
             offset = 0
             setBaseTime()
             running = false
-            pauseButton.text = "Pause"
             stopwatch.stop()
         }
     }
 
-    fun setBaseTime() {
+    private fun setBaseTime() {
         stopwatch.base = SystemClock.elapsedRealtime() - offset
     }
 
-    fun saveOffset() {
+    private fun saveOffset() {
         offset = SystemClock.elapsedRealtime() - stopwatch.base
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putLong(OFF_SET_KEY, offset)
+        outState.putBoolean(RUNNING_KEY, running)
+        outState.putLong(BASE_KEY, stopwatch.base)
+        super.onSaveInstanceState(outState)
+    }
 }
